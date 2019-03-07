@@ -47,6 +47,11 @@ func (tree *RadixTree) insertInNode(node *RadixTreeNode,key string,value interfa
 	commonHeadCnt := GetStringHeadCommonCnt(node.Key,key)
 
 	if commonHeadCnt == len(node.Key){
+        //如果key node.key相等则直接赋值
+        if commonHeadCnt == len(key) {
+            node.Value = value
+            return true
+        }
 		childKey := key[commonHeadCnt:]
 		//如果共同长度等于节点长度，则递归子节点。
 		for i:=0;i< len(node.Child);i++{

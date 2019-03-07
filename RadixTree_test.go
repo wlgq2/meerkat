@@ -13,8 +13,9 @@ func TestRedisTree(t *testing.T) {
 		"1r45334",
 		"123456",
 		"12",
-		"dsfdsfds",
-		"4545dfd",
+		"test123",
+		"testabc",
+		"test",
 	}
 	for i:=0;i<len(strs);i++ {
 		tree.Insert(strs[i],strs[i])
