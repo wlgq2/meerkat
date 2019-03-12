@@ -1,6 +1,6 @@
 package meerkat
 
-type HttpHandler func(string)
+type HttpHandler func(*Context) error
 
 type Router struct{
 	RadixTree

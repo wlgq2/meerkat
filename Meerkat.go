@@ -2,17 +2,21 @@ package meerkat
 
 import (
 	"net/http"
+	"sync"
 )
 
 type Meerkat struct{
 	Server http.Server
-
 	router *HttpRouter
+	contextPool sync.Pool
 }
 
 func New()	*Meerkat{
 	obj := Meerkat{}
 	obj.router = NewHttpRouter()
+	obj.contextPool.New =func() interface{} {
+		return NewContext()
+	}
 	return &obj
 }
 func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
@@ -20,9 +24,11 @@ func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	methon := req.Method
 	handler := meerkat.router.GetHandler(methon,url)
 	if nil != handler{
-		handler("test")
+		context := meerkat.contextPool.Get().(*Context)
+		context.Reset(req,resp)
+		handler(context)
+		meerkat.contextPool.Put(context)
 	}
-	//resp.Write(test)
 }
 
 func (meerkat *Meerkat) Start(addr string){
