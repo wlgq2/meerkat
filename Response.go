@@ -4,7 +4,8 @@ import "net/http"
 import "encoding/xml"
 import "encoding/json"
 import "io"
-
+import "os"
+import "errors"
 
 type Response struct{
 	writer http.ResponseWriter
@@ -30,6 +31,10 @@ func (resp *Response) Write(code int, contentType string, data []byte)  error{
 	resp.setHeaderAndCode(code,contentType)
 	_, err := resp.writer.Write(data)
 	return err
+}
+
+func (resp *Response) Bytes(code int, data []byte) error{
+	return resp.Write(code, "text/plain;charset=UTF-8", data)
 }
 
 func (resp *Response) HTML(code int, data []byte) error{
@@ -106,5 +111,21 @@ func (resp *Response) Redirect(code int, url string) error {
 
 func (resp *Response) NoContent(code int) error {
 	resp.writer.WriteHeader(code)
+	return nil
+}
+
+func (resp *Response) File(fileName string,req *http.Request) error{
+	file, err := os.Open(fileName)
+	if err != nil {
+		return errors.New("not find file or directory : "+fileName)
+	}
+	defer file.Close()
+
+	info, _ := file.Stat()
+	if info.IsDir() {
+		return errors.New(fileName+" is a directory.")
+	}
+
+	http.ServeContent(resp.writer, req, info.Name(), info.ModTime(), file)
 	return nil
 }

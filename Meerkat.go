@@ -31,10 +31,10 @@ func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	}
 }
 
-func (meerkat *Meerkat) Start(addr string){
+func (meerkat *Meerkat) Start(addr string) error {
 	meerkat.Server.Addr = addr
 	meerkat.Server.Handler = meerkat
-	meerkat.Server.ListenAndServe()
+	return meerkat.Server.ListenAndServe()
 }
 
 func (meerkat *Meerkat) GET(path string,handler HttpHandler){
