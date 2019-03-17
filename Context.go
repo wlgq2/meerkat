@@ -9,6 +9,7 @@ func NewContext() *Context{
         response:nil,
         path:"",
         handler:nil,
+
     }
 }
 
@@ -24,3 +25,5 @@ func (obj *Context) Reset(req *http.Request, resp http.ResponseWriter){
     obj.response.Reset(resp)
     obj.request = req
 }
+
+//func (obj *Context) writeResp()
