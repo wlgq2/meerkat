@@ -28,12 +28,8 @@ func TestBindForm(t *testing.T) {
 	if data.Str != "test" {
 		t.Error("test bind form error :",reflect.TypeOf(data.Str))
 	}
-	if data.Flag {
+	if !data.Flag {
 		t.Error("test bind form error :",reflect.TypeOf(data.Flag))
 	}
 	t.Log("success~")
-}
-
-func Test() {
-
 }
