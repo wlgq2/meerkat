@@ -21,22 +21,23 @@ const (
 const DefaultMemory = 32 * 1024 * 1024
 
 type Context struct{
+    meerkat *Meerkat
     request  *http.Request
     response *Response
     path     string
     query    url.Values
+    //func DefaultBinder(req *http.Request) BinderFunc
 }
 
-func NewContext() *Context{
+func NewContext(meerkat *Meerkat) *Context{
 
     return &Context{
+        meerkat:meerkat,
         request:nil,
         response:&Response{nil,false},
         path:"",
     }
 }
-
-
 
 func (context *Context) Reset(req *http.Request, resp http.ResponseWriter){
     context.response.Reset(resp)
@@ -66,7 +67,11 @@ func (context *Context) FormParams() (url.Values, error) {
 }
 
 func (context *Context) Bind(obj interface{}) error {
-    handle := DefaultBinder(context.request)
+    binder :=  context.meerkat.binder
+    if binder ==nil{
+        return errors.New("undefine binder.")
+    }
+    handle := binder.GetBindHanler(context.request)
     if handle != nil {
         return handle(context,obj)
     }

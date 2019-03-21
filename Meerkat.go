@@ -12,15 +12,17 @@ type Meerkat struct{
 	router *HttpRouter
 	contextPool sync.Pool
 	httpErrorHandler HTTPErrorHandler
+	binder Binder
 }
 
 func New()	*Meerkat{
 	obj := Meerkat{
 		router:NewHttpRouter(),
 		httpErrorHandler:func(err error,context *Context){ LogInstance().Errorln(err)},
+		binder:&DefaultBinder{},
 	}
 	obj.contextPool.New =func() interface{} {
-		return NewContext()
+		return NewContext(&obj)
 	}
 	return &obj
 }

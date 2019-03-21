@@ -8,10 +8,16 @@ import "strings"
 import "reflect"
 import "strconv"
 
-type BinderFunc func(*Context, interface{})error
+type Binder interface {
+	GetBindHanler(*http.Request) BinderFunc
+	
+} 
+type BinderFunc func(*Context, interface{}) error
+type DefaultBinder struct{
 
+}
 
-func   JSONBind(context *Context, obj interface{}) error {
+func  (binder *DefaultBinder) JSONBind(context *Context, obj interface{}) error {
 	req := context.request;
 	if req == nil || req.Body == nil {
 		errors.New("req is null.")
@@ -19,43 +25,43 @@ func   JSONBind(context *Context, obj interface{}) error {
 	return json.NewDecoder(req.Body).Decode(obj);
 }
 
-func   XMLBind(context *Context, obj interface{}) error {
+func   (*DefaultBinder) XMLBind(context *Context, obj interface{}) error {
 	req := context.request;
 	decoder := xml.NewDecoder(req.Body)
 	return decoder.Decode(obj)
 }
 
-func   FormBind(context *Context, obj interface{}) error {
+func   (binder *DefaultBinder) FormBind(context *Context, obj interface{}) error {
 	param,err := context.FormParams();
 	if err!=nil{
 		return err
 	}
-	return bindData(obj,param,"form")
+	return binder.bindData(obj,param,"form")
 }
 
-func   QueryBind(context *Context, obj interface{}) error {
-	return bindData(obj,context.QueryParams(),"query")
+func   (binder *DefaultBinder) QueryBind(context *Context, obj interface{}) error {
+	return binder.bindData(obj,context.QueryParams(),"query")
 }
 
 
-func DefaultBinder(req *http.Request) BinderFunc {
+func (binder *DefaultBinder) GetBindHanler(req *http.Request) BinderFunc {
 	if req.Method == http.MethodGet  || req.Method == http.MethodDelete{
-		return QueryBind
+		return binder.QueryBind
 	}
 	contentType := req.Header.Get("Content-Type")
 	switch  {
 	case strings.HasPrefix(contentType,ContentTypeJSON):
-		return JSONBind
+		return binder.JSONBind
 	case strings.HasPrefix(contentType,ContentTypeXML), strings.HasPrefix(contentType,ContentTypeXML2):
-		return XMLBind
+		return binder.XMLBind
 	case strings.HasPrefix(contentType,ContentTypePOSTForm),strings.HasPrefix(contentType,ContentTypeMultipartPOSTForm):
-		return FormBind
+		return binder.FormBind
 	default:
 		return nil
 	}
 }
 
-func   bindData(obj interface{} ,data map[string][]string, tag string) error {
+func   (binder *DefaultBinder) bindData(obj interface{} ,data map[string][]string, tag string) error {
 	values := reflect.ValueOf(obj).Elem()
 	types := reflect.TypeOf(obj).Elem()
 	if types.Kind() != reflect.Struct {
@@ -71,7 +77,7 @@ func   bindData(obj interface{} ,data map[string][]string, tag string) error {
 		name := typeField.Tag.Get(tag)
 		inputValue, exists := data[name]
 		if exists{
-			err := setbindValue(valueField,inputValue[0])
+			err := binder.setbindValue(valueField,inputValue[0])
 			if err !=nil {
 				return err
 			}
@@ -80,35 +86,35 @@ func   bindData(obj interface{} ,data map[string][]string, tag string) error {
 	return nil
 }
 
-func setbindValue( value reflect.Value,valueStr string) error{
+func (binder *DefaultBinder) setbindValue( value reflect.Value,valueStr string) error{
 	valueKind := value.Kind()
 	switch valueKind {
 	case reflect.Int:
-		return setIntField(valueStr, 0, value)
+		return binder.setIntField(valueStr, 0, value)
 	case reflect.Int8:
-		return setIntField(valueStr, 8, value)
+		return binder.setIntField(valueStr, 8, value)
 	case reflect.Int16:
-		return setIntField(valueStr, 16, value)
+		return binder.setIntField(valueStr, 16, value)
 	case reflect.Int32:
-		return setIntField(valueStr, 32, value)
+		return binder.setIntField(valueStr, 32, value)
 	case reflect.Int64:
-		return setIntField(valueStr, 64, value)
+		return binder.setIntField(valueStr, 64, value)
 	case reflect.Uint:
-		return setUintField(valueStr, 0, value)
+		return binder.setUintField(valueStr, 0, value)
 	case reflect.Uint8:
-		return setUintField(valueStr, 8, value)
+		return binder.setUintField(valueStr, 8, value)
 	case reflect.Uint16:
-		return setUintField(valueStr, 16, value)
+		return binder.setUintField(valueStr, 16, value)
 	case reflect.Uint32:
-		return setUintField(valueStr, 32, value)
+		return binder.setUintField(valueStr, 32, value)
 	case reflect.Uint64:
-		return setUintField(valueStr, 64, value)
+		return binder.setUintField(valueStr, 64, value)
 	case reflect.Bool:
-		return setBoolField(valueStr, value)
+		return binder.setBoolField(valueStr, value)
 	case reflect.Float32:
-		return setFloatField(valueStr, 32, value)
+		return binder.setFloatField(valueStr, 32, value)
 	case reflect.Float64:
-		return setFloatField(valueStr, 64, value)
+		return binder.setFloatField(valueStr, 64, value)
 	case reflect.String:
 		value.SetString(valueStr)
 	default:
@@ -118,7 +124,7 @@ func setbindValue( value reflect.Value,valueStr string) error{
 }
 
 
-func setIntField(value string, bitSize int, field reflect.Value) error {
+func (binder *DefaultBinder) setIntField(value string, bitSize int, field reflect.Value) error {
 	if value == "" {
 		value = "0"
 	}
@@ -129,7 +135,7 @@ func setIntField(value string, bitSize int, field reflect.Value) error {
 	return err
 }
 
-func setUintField(value string, bitSize int, field reflect.Value) error {
+func(binder *DefaultBinder)  setUintField(value string, bitSize int, field reflect.Value) error {
 	if value == "" {
 		value = "0"
 	}
@@ -140,7 +146,7 @@ func setUintField(value string, bitSize int, field reflect.Value) error {
 	return err
 }
 
-func setBoolField(value string, field reflect.Value) error {
+func (binder *DefaultBinder) setBoolField(value string, field reflect.Value) error {
 	if value == "" {
 		value = "false"
 	}
@@ -151,7 +157,7 @@ func setBoolField(value string, field reflect.Value) error {
 	return err
 }
 
-func setFloatField(value string, bitSize int, field reflect.Value) error {
+func (binder *DefaultBinder) setFloatField(value string, bitSize int, field reflect.Value) error {
 	if value == "" {
 		value = "0.0"
 	}
