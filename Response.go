@@ -34,15 +34,15 @@ func (resp *Response) Write(code int, contentType string, data []byte)  error{
 }
 
 func (resp *Response) Bytes(code int, data []byte) error{
-	return resp.Write(code, "text/plain;charset=UTF-8", data)
+	return resp.Write(code, ContentTypePlain+";"+CharsetUTF8, data)
 }
 
 func (resp *Response) HTML(code int, data []byte) error{
-	return resp.Write(code, "text/html;charset=UTF-8", data)
+	return resp.Write(code, ContentTypeXML2+";"+CharsetUTF8, data)
 }
 
 func (resp *Response) JSON(code int, data []byte) error{
-	return resp.Write(code, "application/json;charset=UTF-8", data)
+	return resp.Write(code, ContentTypeJSON+";"+CharsetUTF8, data)
 }
 
 func (resp *Response) JSONEncode(code int, data interface{}, indent string) error{
@@ -50,12 +50,12 @@ func (resp *Response) JSONEncode(code int, data interface{}, indent string) erro
 	if(indent != ""){
 		enc.SetIndent("",indent)
 	}
-	resp.setHeaderAndCode(code,"application/json;charset=UTF-8")
+	resp.setHeaderAndCode(code,ContentTypeJSON+";"+CharsetUTF8)
 	return enc.Encode(data)
 }
 
 func (resp *Response) JSONP(code int, callback string,data []byte) (err error){
-	resp.setHeaderAndCode(code,"application/javascript;charset=UTF-8")
+	resp.setHeaderAndCode(code,ContentTypeJSONP+";"+CharsetUTF8)
 	if _, err = resp.writer.Write([]byte(callback + "(")); err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (resp *Response) JSONP(code int, callback string,data []byte) (err error){
 }
 
 func (resp *Response) JSONPEncode(code int, callback string,data interface{}) (err error){
-	resp.setHeaderAndCode(code,"application/javascript;charset=UTF-8")
+	resp.setHeaderAndCode(code,ContentTypeJSONP+";"+CharsetUTF8)
 	if _, err = resp.writer.Write([]byte(callback + "(")); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (resp *Response) JSONPEncode(code int, callback string,data interface{}) (e
 }
 
 func (resp *Response) XML(code int, data []byte) error{
-	resp.setHeaderAndCode(code,"application/xml;charset=UTF-8")
+	resp.setHeaderAndCode(code,ContentTypeXML+";"+CharsetUTF8)
 	if _, err := resp.writer.Write([]byte(xml.Header)); err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (resp *Response) XMLEncode(code int, data interface{}, indent string) error
 	if(indent != ""){
 		enc.Indent("",indent)
 	}
-	resp.setHeaderAndCode(code,"application/xml;charset=UTF-8")
+	resp.setHeaderAndCode(code,ContentTypeXML+";"+CharsetUTF8)
 	return enc.Encode(data)
 }
 

@@ -5,20 +5,26 @@ import (
 	"sync"
 )
 
+type HTTPErrorHandler func(error, *Context)
+
 type Meerkat struct{
 	Server http.Server
 	router *HttpRouter
 	contextPool sync.Pool
+	httpErrorHandler HTTPErrorHandler
 }
 
 func New()	*Meerkat{
-	obj := Meerkat{}
-	obj.router = NewHttpRouter()
+	obj := Meerkat{
+		router:NewHttpRouter(),
+		httpErrorHandler:func(err error,context *Context){ LogInstance().Errorln(err)},
+	}
 	obj.contextPool.New =func() interface{} {
 		return NewContext()
 	}
 	return &obj
 }
+
 func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	url := req.URL.String()
 	methon := req.Method
@@ -26,11 +32,19 @@ func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	if nil != handler{
 		context := meerkat.contextPool.Get().(*Context)
 		context.Reset(req,resp)
-		handler(context)
+		err :=handler(context)
 		meerkat.contextPool.Put(context)
+		if err != nil {
+			meerkat.HttpErrorHandle(err, context)
+		}
 	}
 }
 
+func (meerkat *Meerkat) HttpErrorHandle(err error,context *Context){
+	if meerkat.httpErrorHandler != nil{
+		meerkat.httpErrorHandler(err,context)
+	}
+}
 func (meerkat *Meerkat) Start(addr string) error {
 	meerkat.Server.Addr = addr
 	meerkat.Server.Handler = meerkat
