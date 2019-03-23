@@ -3,7 +3,6 @@ package meerkat
 import "net/http"
 
 
-
 type HttpRouter struct{
 	routers map[string] *Router
 }
@@ -16,7 +15,7 @@ func NewHttpRouter() *HttpRouter{
 	return &rst
 }
 
-func (router *HttpRouter) GetHandler(method string, path string) HttpHandler{
+func (router *HttpRouter) GetHandler(method string, path string) (HttpHandler,int,string){
 	route := router.routers[method]
 	return route.GetHandler(path)
 }

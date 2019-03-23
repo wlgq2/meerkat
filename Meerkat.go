@@ -30,10 +30,11 @@ func New()	*Meerkat{
 func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	url := req.URL.String()
 	methon := req.Method
-	handler := meerkat.router.GetHandler(methon,url)
+	handler,len,param := meerkat.router.GetHandler(methon,url)
 	if nil != handler{
 		context := meerkat.contextPool.Get().(*Context)
 		context.Reset(req,resp)
+		context.SetRouteParam(url,len,param)
 		err :=handler(context)
 		meerkat.contextPool.Put(context)
 		if err != nil {

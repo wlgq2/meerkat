@@ -27,7 +27,7 @@ func LogInstance() *Log {
 	logOnce.Do(func() {
 		logObj = &Log {}
 		logObj.CurrentLever = 0
-		logObj.DefaultInit()
+		//logObj.DefaultInit()
     })
     return logObj
 }

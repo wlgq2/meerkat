@@ -26,6 +26,7 @@ type Context struct{
     response *Response
     path     string
     query    url.Values
+    routeParams   map[string]string
     //func DefaultBinder(req *http.Request) BinderFunc
 }
 
@@ -43,6 +44,21 @@ func (context *Context) Reset(req *http.Request, resp http.ResponseWriter){
     context.response.Reset(resp)
     context.request = req
     context.query = nil
+    context.routeParams = make(map[string]string)
+}
+
+func (context *Context) SetRouteParam(url string ,len int, param string){
+    if param != ""{
+        context.routeParams[param] = url[len:]
+    }
+}
+
+func (context *Context) GetRouteParam(key string) string{
+    if value, exist := context.routeParams[key]; exist {
+        return value
+    } else {
+        return ""
+    }
 }
 
 func (context *Context) QueryParams() url.Values {

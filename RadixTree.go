@@ -102,6 +102,14 @@ func (tree *RadixTree) getNode(key string, node *RadixTreeNode) *RadixTreeNode{
     commonHeadCnt := GetStringHeadCommonCnt(node.Key,key)
     //该key节点不存在
     if commonHeadCnt < len(node.Key){
+    	//最后一个字符为'*',且之前字符相等，在找到节点。
+    	if commonHeadCnt+1 == len(node.Key) && node.Key[len(node.Key)-1] == '*'{
+    		return node
+		}
+		//最后一个字符为':',且之前字符相等，在找到节点。
+		if commonHeadCnt+1 == len(node.Key) && node.Key[len(node.Key)-1] == ':'{
+			return node
+		}
         return nil
     }
     //找到该节点
