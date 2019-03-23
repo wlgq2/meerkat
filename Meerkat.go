@@ -58,3 +58,40 @@ func (meerkat *Meerkat) GET(path string,handler HttpHandler){
 	meerkat.router.GET(path,handler)
 }
 
+func (meerkat *Meerkat) CONNECT(path string,handler HttpHandler){
+	meerkat.router.CONNECT(path,handler)
+}
+
+func(meerkat *Meerkat) DELETE(path string,handler HttpHandler){
+	meerkat.router.DELETE(path,handler)
+}
+
+
+func (meerkat *Meerkat) HEAD(path string,handler HttpHandler){
+	meerkat.router.HEAD(path,handler)
+}
+
+
+func (meerkat *Meerkat) OPTIONS(path string,handler HttpHandler){
+	meerkat.router.OPTIONS(path,handler)
+}
+
+
+func (meerkat *Meerkat) PATCH(path string,handler HttpHandler){
+	meerkat.router.PATCH(path,handler)
+}
+
+
+func (meerkat *Meerkat) POST(path string,handler HttpHandler){
+	meerkat.router.POST(path,handler)
+}
+
+
+func (meerkat *Meerkat) PUT(path string,handler HttpHandler){
+	meerkat.router.PUT(path,handler)
+}
+
+
+func (meerkat *Meerkat) TRACE(path string,handler HttpHandler){
+	meerkat.router.TRACE(path,handler)
+}
