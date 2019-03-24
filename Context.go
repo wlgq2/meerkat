@@ -157,3 +157,15 @@ func (context *Context) File(file string) error{
 }
 
 
+//cookie
+func (context *Context) Cookie(name string) (*http.Cookie, error) {
+    return context.request.Cookie(name)
+}
+
+func (context *Context) SetCookie(cookie *http.Cookie) {
+    http.SetCookie(context.response.writer, cookie)
+}
+
+func (context *Context) Cookies() []*http.Cookie {
+    return context.request.Cookies()
+}
