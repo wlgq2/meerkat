@@ -3,6 +3,7 @@ package meerkat
 import (
 	"net/http"
 	"sync"
+	"errors"
 )
 
 type HTTPErrorHandler func(error, *Context)
@@ -94,4 +95,20 @@ func (meerkat *Meerkat) PUT(path string,handler HttpHandler){
 
 func (meerkat *Meerkat) TRACE(path string,handler HttpHandler){
 	meerkat.router.TRACE(path,handler)
+}
+
+
+func (meerkat *Meerkat) Static(path string,root string) {
+	if root == "" {
+		root = "." // For security we want to restrict to CWD.
+	}
+
+	 meerkat.GET(path+"/*", func(context *Context) error {
+		file := context.GetRouteParam("*")
+		if file == "" {
+			return errors.New("not static file.")
+		}
+		return context.File(root+file)
+	})
+
 }

@@ -33,12 +33,12 @@ func (router *Router) Insert(key string,value HttpHandler){
 		key = key[:pos+1]
 		len = pos
 	}
-	//路由*
+	//任意路由*
 	pos =strings.Index(key,"*")
 	if pos >=0{
 		key = key[:pos+1]
 		param = ""
-		len = 0
+		len = pos
 	}
 	node :=TreeNodeType{
 		len:len,
