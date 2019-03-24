@@ -68,6 +68,12 @@ func (context *Context) QueryParams() url.Values {
     return context.query
 }
 
+func (context *Context) QueryParam(name string) string {
+    if context.query == nil {
+        context.query = context.request.URL.Query()
+    }
+    return context.query.Get(name)
+}
 
 func (context *Context) FormParams() (url.Values, error) {
     if strings.HasPrefix(context.request.Header.Get("Content-Type"), ContentTypePOSTForm) {

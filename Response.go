@@ -38,7 +38,7 @@ func (resp *Response) Bytes(code int, data []byte) error{
 }
 
 func (resp *Response) HTML(code int, data []byte) error{
-	return resp.Write(code, ContentTypeXML2+";"+CharsetUTF8, data)
+	return resp.Write(code, ContentTypeHTML+";"+CharsetUTF8, data)
 }
 
 func (resp *Response) JSON(code int, data []byte) error{
@@ -75,7 +75,7 @@ func (resp *Response) JSONPEncode(code int, callback string,data interface{}) (e
 	if err = enc.Encode(data); err != nil {
 		return
 	}
-	_, err = resp.writer.Write([]byte(")"))
+	_, err = resp.writer.Write([]byte(");"))
 	return err
 }
 
