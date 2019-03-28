@@ -4,9 +4,15 @@ import (
 	"net/http"
 	"sync"
 	"errors"
+	"io"
 )
 
 type HTTPErrorHandler func(error, *Context)
+
+type RenderInterface interface {
+	Render(io.Writer, string, interface{}, *Context) error
+}
+
 
 type Meerkat struct{
 	Server http.Server
@@ -14,6 +20,7 @@ type Meerkat struct{
 	contextPool sync.Pool
 	httpErrorHandler HTTPErrorHandler
 	binder Binder
+	render RenderInterface
 }
 
 func New()	*Meerkat{
@@ -21,6 +28,7 @@ func New()	*Meerkat{
 		router:NewHttpRouter(),
 		httpErrorHandler:func(err error,context *Context){ LogInstance().Errorln(err)},
 		binder:&DefaultBinder{},
+		render:nil,
 	}
 	obj.contextPool.New =func() interface{} {
 		return NewContext(&obj)
@@ -100,7 +108,7 @@ func (meerkat *Meerkat) TRACE(path string,handler HttpHandler){
 
 func (meerkat *Meerkat) Static(path string,root string) {
 	if root == "" {
-		root = "." // For security we want to restrict to CWD.
+		root = "."
 	}
 
 	 meerkat.GET(path+"/*", func(context *Context) error {
@@ -111,4 +119,15 @@ func (meerkat *Meerkat) Static(path string,root string) {
 		return context.File(root+file)
 	})
 
+}
+
+func (meerkat *Meerkat) SetRender(obj RenderInterface) {
+	meerkat.render = obj
+}
+
+func (meerkat *Meerkat) Render(writer io.Writer, name string, data interface{},context *Context) error{
+	if meerkat.render != nil{
+		return meerkat.render.Render(writer,name,data,context)
+	}
+	return  errors.New("undifine render func.")
 }

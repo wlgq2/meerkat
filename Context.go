@@ -5,6 +5,7 @@ import "net/url"
 import "io"
 import "errors"
 import "strings"
+import "bytes"
 
 const (
     CharsetUTF8                  = "charset=UTF-8"
@@ -20,6 +21,7 @@ const (
 
 const DefaultMemory = 32 * 1024 * 1024
 
+
 type Context struct{
     meerkat *Meerkat
     request  *http.Request
@@ -27,7 +29,6 @@ type Context struct{
     path     string
     query    url.Values
     routeParams   map[string]string
-
     //func DefaultBinder(req *http.Request) BinderFunc
 }
 
@@ -172,4 +173,13 @@ func (context *Context) SetCookie(cookie *http.Cookie) {
 
 func (context *Context) Cookies() []*http.Cookie {
     return context.request.Cookies()
+}
+
+func (context *Context) Render(code int, name string, data interface{})  error {
+    buf := new(bytes.Buffer)
+    err := context.meerkat.Render(buf,name,data,context)
+    if err != nil{
+        return err
+    }
+    return context.HTMLBlob(code, buf.Bytes())
 }
