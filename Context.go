@@ -81,7 +81,7 @@ func (context *Context) QueryParam(name string) string {
 }
 
 func (context *Context) FormParams() (url.Values, error) {
-    if strings.HasPrefix(context.request.Header.Get("Content-Type"), ContentTypePOSTForm) {
+    if strings.HasPrefix(context.request.Header.Get("Content-Type"), ContentTypeMultipartPOSTForm) {
         if err := context.request.ParseMultipartForm(DefaultMemory); err != nil {
             return nil, err
         }
