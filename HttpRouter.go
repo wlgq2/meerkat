@@ -11,6 +11,14 @@ func NewHttpRouter() *HttpRouter{
 	rst := HttpRouter{}
 	rst.routers = map[string] *Router{
 		http.MethodGet : &Router{},
+		http.MethodConnect : &Router{},
+		http.MethodDelete : &Router{},
+		http.MethodHead : &Router{},
+		http.MethodOptions : &Router{},
+		http.MethodPatch : &Router{},
+		http.MethodPost : &Router{},
+		http.MethodPut : &Router{},
+		http.MethodTrace : &Router{},
 	}
 	return &rst
 }
