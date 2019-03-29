@@ -9,6 +9,8 @@ import (
 
 type HTTPErrorHandler func(error, *Context)
 
+type  MiddlewareFunc func(HttpHandler) HttpHandler
+
 type RenderInterface interface {
 	Render(io.Writer, string, interface{}, *Context) error
 }
@@ -21,6 +23,8 @@ type Meerkat struct{
 	httpErrorHandler HTTPErrorHandler
 	binder Binder
 	render RenderInterface
+
+	middlewares       []MiddlewareFunc
 }
 
 func New()	*Meerkat{
@@ -63,46 +67,57 @@ func (meerkat *Meerkat) Start(addr string) error {
 	return meerkat.Server.ListenAndServe()
 }
 
-func (meerkat *Meerkat) GET(path string,handler HttpHandler){
-	meerkat.router.GET(path,handler)
+func (meerkat *Meerkat) constructHttpHandler(handler HttpHandler,middleware ...MiddlewareFunc) HttpHandler{
+	return func(context *Context) error{
+		callback := handler
+		// Chain middleware
+		// 中间件调用链
+		for i := len(middleware) - 1; i >= 0; i-- {
+			callback = middleware[i](callback)
+		}
+		return callback(context)
+	}
+}
+func (meerkat *Meerkat) GET(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.GET(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
-func (meerkat *Meerkat) CONNECT(path string,handler HttpHandler){
-	meerkat.router.CONNECT(path,handler)
+func (meerkat *Meerkat) CONNECT(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.CONNECT(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
-func(meerkat *Meerkat) DELETE(path string,handler HttpHandler){
-	meerkat.router.DELETE(path,handler)
-}
-
-
-func (meerkat *Meerkat) HEAD(path string,handler HttpHandler){
-	meerkat.router.HEAD(path,handler)
-}
-
-
-func (meerkat *Meerkat) OPTIONS(path string,handler HttpHandler){
-	meerkat.router.OPTIONS(path,handler)
-}
-
-
-func (meerkat *Meerkat) PATCH(path string,handler HttpHandler){
-	meerkat.router.PATCH(path,handler)
+func(meerkat *Meerkat) DELETE(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.DELETE(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
 
-func (meerkat *Meerkat) POST(path string,handler HttpHandler){
-	meerkat.router.POST(path,handler)
+func (meerkat *Meerkat) HEAD(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.HEAD(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
 
-func (meerkat *Meerkat) PUT(path string,handler HttpHandler){
-	meerkat.router.PUT(path,handler)
+func (meerkat *Meerkat) OPTIONS(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.OPTIONS(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
 
-func (meerkat *Meerkat) TRACE(path string,handler HttpHandler){
-	meerkat.router.TRACE(path,handler)
+func (meerkat *Meerkat) PATCH(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.PATCH(path,meerkat.constructHttpHandler(handler,middleware...))
+}
+
+
+func (meerkat *Meerkat) POST(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.POST(path,meerkat.constructHttpHandler(handler,middleware...))
+}
+
+
+func (meerkat *Meerkat) PUT(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.PUT(path,meerkat.constructHttpHandler(handler,middleware...))
+}
+
+
+func (meerkat *Meerkat) TRACE(path string,handler HttpHandler,middleware ...MiddlewareFunc){
+	meerkat.router.TRACE(path,meerkat.constructHttpHandler(handler,middleware...))
 }
 
 
@@ -119,6 +134,10 @@ func (meerkat *Meerkat) Static(path string,root string) {
 		return context.File(root+file)
 	})
 
+}
+
+func (meerkat *Meerkat) Use( middleware ...MiddlewareFunc) {
+	meerkat.middlewares = append(meerkat.middlewares, middleware...)
 }
 
 func (meerkat *Meerkat) SetRender(obj RenderInterface) {
