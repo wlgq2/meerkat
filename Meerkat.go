@@ -43,11 +43,15 @@ func New()	*Meerkat{
 func (meerkat *Meerkat) ServeHTTP(resp http.ResponseWriter,req *http.Request){
 	path := req.URL.Path
 	methon := req.Method
-	handler,len,param := meerkat.router.GetHandler(methon,path)
+	handler,size,param := meerkat.router.GetHandler(methon,path)
+	//middlewares 中间件
+	for i := len(meerkat.middlewares) - 1; i >= 0; i-- {
+		handler = meerkat.middlewares[i](handler)
+	}
 	if nil != handler{
 		context := meerkat.contextPool.Get().(*Context)
 		context.Reset(req,resp)
-		context.SetRouteParam(path,len,param)
+		context.SetRouteParam(path,size,param)
 		err :=handler(context)
 		meerkat.contextPool.Put(context)
 		if err != nil {
