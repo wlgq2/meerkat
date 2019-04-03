@@ -17,6 +17,10 @@ func (resp *Response) Reset(writer http.ResponseWriter){
 	resp.committed = false
 }
 
+func (resp *Response) Writer() http.ResponseWriter{
+	return resp.writer
+}
+
 func (resp *Response) setHeaderAndCode(code int, contentType string) {
 	if resp.committed {
 		LogInstance().Warnln("response already committed...")

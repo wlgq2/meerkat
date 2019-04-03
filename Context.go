@@ -49,6 +49,14 @@ func (context *Context) Reset(req *http.Request, resp http.ResponseWriter){
     context.routeParams = make(map[string]string)
 }
 
+func (context *Context) Request()  *http.Request{
+    return context.request
+}
+
+func (context *Context) Response()  *Response{
+    return context.response
+}
+
 func (context *Context) SetRouteParam(url string ,len int, param string){
     if param != ""{
         context.routeParams[param] = url[len:]
