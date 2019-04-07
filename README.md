@@ -36,5 +36,5 @@ func main() {
 
 ```
 
-## More Example
-[meerkat's example](https://github.com/wlgq2/meerkat_example)
+## More Examples
+[meerkat's examples](https://github.com/wlgq2/meerkat_example)
