@@ -9,7 +9,7 @@ meerkat is a web framework bese golang.
 * Static files support.
 * Template support.
 * Extensible middleware.
-* Custom logger interface.
+* Custom log interface.
 
 ## Quick start
 ```go
