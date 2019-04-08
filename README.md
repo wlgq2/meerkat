@@ -1,5 +1,5 @@
 # meerkat
-meerkat is a web framework bese golang.
+meerkat is a web framework base golang.
 
 ## Feature
 
